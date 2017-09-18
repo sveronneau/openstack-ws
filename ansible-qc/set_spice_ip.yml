@@ -1,0 +1,20 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: obtain static nat
+      shell: /usr/bin/dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | awk -F'"' '{ print $2}'
+      args:
+        executable: /bin/bash
+      register: my_output
+
+    - set_fact:
+        my_public_ip: "{{ my_output.stdout }}"
+
+    - debug:
+        var: my_public_ip
+
+    - name: plug public_ip in nova.conf.j2
+      lineinfile:
+        path: /etc/ansible/roles/os_nova/templates/nova.conf.j2
+        regexp: 'html5proxy_base_url\s=\s'
+        line: 'html5proxy_base_url = https://{{ my_public_ip }}:6082/spice_auto.html'

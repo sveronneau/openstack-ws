@@ -1,0 +1,12 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: edit tempest values in /etc/openstack_deploy/user_variables.yml
+      lineinfile:
+        path: /etc/openstack_deploy/user_variables.yml
+        regexp: 'tempest_{{ item }}:\syes'
+        line: 'tempest_{{ item }}: no'
+      with_items:
+        - install
+        - run

@@ -1,0 +1,11 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - copy:
+        src: ./set_spice_ip.yml
+        dest: ./set_spice_ip.yml
+
+    - copy:
+        src: ./change_user_variables.yml
+        dest: ./change_user_variables.yml

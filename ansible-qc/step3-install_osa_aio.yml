@@ -1,0 +1,9 @@
+---
+- hosts: aio-nodes
+  become: true
+  tasks:
+    - name: Running the setup-infrastructure openstack-ansible playbook
+      shell: nohup openstack-ansible setup-infrastructure.yml  > setup-infrastructure.out
+      args:
+        chdir: /opt/openstack-ansible/playbooks
+        executable: /bin/bash

@@ -1,0 +1,66 @@
+---
+- hosts: aio-nodes
+  become: true
+  tasks:
+
+    - name: Run the equivalent of "apt-get update" as a separate step
+      apt:
+        update_cache: yes
+
+    - name: Upgrade all packages to the latest version
+      apt:
+        upgrade: yes
+
+    - name: Remove useless packages from the cache
+      apt:
+        autoclean: yes
+
+    - name: Remove dependencies that are no longer required
+      apt:
+        autoremove: yes
+
+    - name: cloning the OpenStack-Ansible repository
+      git:
+        repo: https://git.openstack.org/openstack/openstack-ansible
+        dest: /opt/openstack-ansible
+        version: stable/pike
+        clone: yes
+
+    - name: run scripts/bootstrap-ansible.sh
+      shell: nohup scripts/bootstrap-ansible.sh  > bootstrap-ansible.out
+      args:
+        chdir: /opt/openstack-ansible
+        executable: /bin/bash
+      environment:
+        BOOTSTRAP_OPTS: "bootstrap_host_data_disk_device=xvdb"
+
+    - name: run scripts/bootstrap-aio.sh
+      shell: nohup scripts/bootstrap-aio.sh  > bootstrap-aio.out
+      args:
+        chdir: /opt/openstack-ansible
+        executable: /bin/bash
+      environment:
+        BOOTSTRAP_OPTS: "bootstrap_host_data_disk_device=xvdb"
+    
+    - name: Copy/Rename files to add services
+      copy:
+        remote_src=True
+        src=/opt/openstack-ansible/etc/openstack_deploy/conf.d/{{ item }}.yml.aio
+        dest=/etc/openstack_deploy/conf.d/{{ item }}.yml
+      with_items:
+        - aodh
+        - gnocchi
+        - ceilometer
+        - magnum
+
+    - name: enabling multidomain support in horizon
+      lineinfile:
+        path: /etc/ansible/roles/os_horizon/templates/horizon_local_settings.py.j2
+        regexp: '^OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT\s='
+        line: 'OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT = True'
+    
+    - name: setting keystone default domain
+      lineinfile:
+        path: /etc/ansible/roles/os_horizon/templates/horizon_local_settings.py.j2
+        regexp: '^OPENSTACK_KEYSTONE_DEFAULT_DOMAIN\s='
+        line: "OPENSTACK_KEYSTONE_DEFAULT_DOMAIN = 'default'"
