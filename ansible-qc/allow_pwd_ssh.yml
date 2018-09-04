@@ -1,0 +1,12 @@
+- name: Allow password for SSH and set cca-user pasword
+  hosts: all
+  become: true
+  tasks:
+    - name: Change SSHD Config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: 'PasswordAuthentication'
+        line: 'PasswordAuthentication yes'
+    - name: Set cca-user password to openstackrules!
+      user: name=cca-user update_password=always password="$6$Ta8sEFdH$BmXJDDXoDU4H3UYtuDCs48tdRehykORo5qjkPx4E8LVEYqHAmxgbPmDwqMnNFQIo3AONORirHPeMDXoLGHD3Y1"
+    - name: Restart SSHD service
