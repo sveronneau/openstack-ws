@@ -9,3 +9,7 @@
     - copy:
         src: ./change_user_variables.yml
         dest: ./change_user_variables.yml
+
+    - copy:
+        src: ./allow_pwd_ssh.yml
+        dest: ./allow_pwd_ssh.yml
