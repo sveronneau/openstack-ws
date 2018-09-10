@@ -10,3 +10,6 @@
     - name: Set cca-user password to openstackrules!
       user: name=cca-user update_password=always password="$6$Ta8sEFdH$BmXJDDXoDU4H3UYtuDCs48tdRehykORo5qjkPx4E8LVEYqHAmxgbPmDwqMnNFQIo3AONORirHPeMDXoLGHD3Y1"
     - name: Restart SSHD service
+      service:
+        name: sshd
+        state: restarted
